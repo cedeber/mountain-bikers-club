@@ -10,6 +10,8 @@ What things you need to install the software and how to install them.
 
 ### Environment variables
 
+During development, you can create a `.env` file on the root.
+
 ```ini
 ACTIX_ADDRESS=0.0.0.0
 ACTIX_PORT=8080
