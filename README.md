@@ -28,3 +28,13 @@ AWS_S3_BUCKET_NAME=
 # AWS_REGION=
 AWS_S3_ENDPOINT=
 ```
+
+## Contribution
+Please make sure to read the [Contributing Guide](CONTRIBUTING.md) before making a pull request.
+
+Thank you to all [the people who already contributed to Mountain Bikers Club](https://github.com/cedeber/mountain-bikers-club/graphs/contributors)!
+
+## License
+[AGPL-3.0](LICENSE)
+
+Copyright (c) 2018-2021, Cédric Eberhardt
