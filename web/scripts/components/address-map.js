@@ -17,7 +17,7 @@ export class AddressMap extends LitElement {
   render () {
     return html`
       <link rel="stylesheet" href="https://cdn.skypack.dev/leaflet/dist/leaflet.css">
-      <link rel="stylesheet" href="/web/assets/fonts/fa.css">
+      <link rel="stylesheet" href="/web/assets/font-awesome/fa.css">
       <div id="map" style="width: 100%; height: 200px;"></div>
     `
   }
