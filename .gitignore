@@ -1,0 +1,12 @@
+# Rust application
+/target
+/.env
+/tmp
+
+# JetBrains & VSCode IDE
+/.idea
+/*.iml
+/.vscode
+
+# macOS
+.DS_Store
