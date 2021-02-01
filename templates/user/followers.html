@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/user_column.html" as user_column %}
+{% import "macros/user_menu.html" as user_menu %}
+{% block title %}{{ member | display_name }} / Abonnés{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="row my-5">
+      <div class="col-12 col-md-3">
+        {{ user_column::column(member=member, user=user, is_followed=is_followed) }}
+      </div>
+      <div class="col-12 col-md-9">
+        <nav class="mb-3">
+          {{ user_menu::menu(username=member.username, active_tab="friends") }}
+        </nav>
+        <div class="list-group list-group-flush">
+          {% if people | length == 0 %}
+            <p>Aucun abonné</p>
+          {% endif %}
+          {% for friend in people %}
+            <div class="list-group-item list-group-item-action py-4 d-flex w-100 justify-content-between"
+                 aria-current="true">
+              <div>
+                <div class="d-flex align-items-center mb-1">
+                  <img src="{{ friend | avatar_url }}" width="50" height="50" class="rounded-circle me-2">
+                  <div>
+                    <a href="/{{ friend.username }}" class="stretched-link">
+                      <h5 class="d-inline-block mb-0">{{ friend | display_name }}</h5>
+                    </a>
+                    {% if friend.name %}
+                      <p class="mb-0">
+                        <small class="text-muted">
+                          {{ friend.username }}
+                        </small>
+                      </p>
+                    {% endif %}
+                  </div>
+                </div>
+                {% if friend.bio %}
+                  <p class="mb-2 text-break">{{ friend.bio }}</p>
+                {% endif %}
+                {% if friend.location %}
+                  <small class="me-3">
+                    <i class="fad fa-map-marker-alt"></i>
+                    {{ friend.location }}
+                  </small>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

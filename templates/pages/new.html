@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_trip.html" as form_trip %}
+{% block title %}Nouvelle sortie{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="col col-lg-8 col-xl-7 mx-auto text-center my-5">
+      <img class="mb-4" src="/web/assets/logos/icon-44.svg" alt="" width="88" height="88">
+      <h1 class="h3 mb-3 fw-normal">Enregistrer une sortie</h1>
+      <form action="/api/trip/new" method="post" accept-charset="utf-8" class="text-start">
+        {{ form_trip::form_trip() }}
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-success btn-lg">
+            Créer une nouvelle sortie
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+{% endblock content %}

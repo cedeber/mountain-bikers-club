@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/user_column.html" as user_column %}
+{% import "macros/user_menu.html" as user_menu %}
+{% block title %}{{ member | display_name }} / Sorties{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="row my-5">
+      <div class="col-12 col-md-3">
+        {{ user_column::column(member=member, user=user, is_followed=is_followed) }}
+      </div>
+      <div class="col-12 col-md-9">
+        <nav class="mb-3">
+          {{ user_menu::menu(username=member.username, active_tab="trips") }}
+        </nav>
+        <input type="text" autofocus style="position: fixed; left: -10000px;" tabindex="-1">
+        <div class="container mb-3 p-0">
+          <div class="row">
+            <div class="col">
+              <form action="/api/user/search" method="post" accept-charset="utf-8">
+                <input type="hidden" name="member" value="{{ member.username }}">
+                <input type="hidden" name="tab" value="trips">
+                <div class="input-group input-group-sm">
+                  {% if search %}
+                    <a class="btn btn-secondary" href="/{{ member.username }}?tab=trips" role="button">
+                      <i class="fad fa-times"></i>
+                    </a>
+                  {% endif %}
+                  <input type="text" class="form-control" placeholder="Trouver une sortie..." value="{{ search }}"
+                         aria-label="Trouver une sortie" name="query" minlength="3" maxlength="80">
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fad fa-search"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div class="col-auto">
+              <div class="btn-group btn-group-sm" role="group">
+                <a class="btn btn-outline-primary {% if not show and not search %}active{% endif %}" href="?tab=trips"
+                   aria-current="page">Toutes</a>
+                <a class="btn btn-outline-primary {% if show == "finished" %}active{% endif %}"
+                   href="?tab=trips&show=finished">Terminées</a>
+              </div>
+            </div>
+            {% if user and user.username == member.username %}
+              <div class="col-auto">
+                <div class="btn-group btn-group-sm" role="group">
+                  <a class="btn btn-success" href="/-/new">Nouvelle sortie</a>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="list-group list-group-flush">
+          {% if member_trips | length == 0 %}
+            {% if search %}
+              <p>Aucune sortie n'a été trouvée.</p>
+            {% else %}
+              <p>Aucune sortie n'a été enregistrée.</p>
+            {% endif %}
+          {% else %}
+            {% for trip in member_trips %}
+              <div class="list-group-item list-group-item-action py-4 d-flex w-100 justify-content-between"
+                   aria-current="true">
+                <div>
+                  <div>
+                    <a href="/{{ member.username }}/trip/{{ trip.uuid }}" class="stretched-link">
+                      <h5 class="mb-1 me-2 d-inline-block">{{ trip.name }}</h5>
+                    </a>
+                    <!--i class="fad fa-lock position-relative me-2" style="bottom: 2px"></i>
+                    <span class="badge bg-light rounded-pill border border-secondary text-secondary position-relative"
+                          style="bottom: 3px">rejoint</span-->
+                  </div>
+                  <!--p class="mb-1 d-flex align-items-center">
+                    <img src="{{ member | avatar_url }}" width="24" height="24" alt="" aria-hidden="true"
+                         class="me-2 rounded-circle">
+                    <span>{{ member | display_name }}</span>
+                  </p-->
+                  <p class="mb-1">
+                    <small class="text-muted">
+                      <date-time date="{{ trip.date }}">{{ trip.date }}</date-time>
+                    </small>
+                  </p>
+                  {% if trip.description %}
+                    <p class="mb-2 text-break">{{ trip.description }}</p>
+                  {% endif %}
+                  {% if trip.time %}
+                    <small class="me-3">
+                      <i class="fad fa-stopwatch me-1"></i>
+                      {{ trip.time.0 }}:{{ trip.time.1 }}
+                    </small>
+                  {% endif %}
+                  {% if trip.distance %}
+                    <small class="me-3">
+                      <i class="fad fa-route me-1"></i>
+                      {{ trip.distance }} kms
+                    </small>
+                  {% endif %}
+                  {% if trip.elevation %}
+                    <small class="me-3">
+                      <i class="fad fa-mountain me-1"></i>
+                      {{ trip.elevation }} m
+                    </small>
+                  {% endif %}
+                  {% if trip.meeting_point %}
+                    <small class="me-3">
+                      <i class="fad fa-map-marker-alt me-1"></i>
+                      {{ trip.meeting_point }}
+                    </small>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% if trips_count > offset_step %}
+          <nav aria-label="Page navigation example" class="mt-4">
+            <ul class="pagination justify-content-center">
+              {% set min = offset - offset_step %}
+              {% set max = offset + offset_step %}
+              <li class="page-item {% if min < 0 %}disabled{% endif %}">
+                <a class="page-link"
+                   href="?tab=trips{% if show %}&show={{ show }}{% endif %}{% if min >= 0 %}&offset={{ min }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+                   {% if min < 0 %}aria-disabled="true" tabindex="-1"{% endif %}>Plus récentes</a>
+              </li>
+              <li class="page-item {% if max >= trips_count %}disabled{% endif %}">
+                <a class="page-link"
+                   href="?tab=trips{% if show %}&show={{ show }}{% endif %}{% if max < trips_count %}&offset={{ max }}{% endif %}{% if search %}&search={{ search }}{% endif %}"
+                   {% if max >= trips_count %}aria-disabled="true" tabindex="-1"{% endif %}>Plus anciennes</a>
+              </li>
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+{% endblock content %}

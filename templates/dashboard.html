@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_join.html" as form %}
+{% block title %}Bienvenue{% endblock title %}
+{% block navigation %}
+  {{ navigation::connected(user=user) }}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="row gx-5 my-5">
+      <div class="col">
+        <h2 class="mb-3">En tant qu'organisateur</h2>
+        <a class="btn btn-success mb-4" role="button" href="/-/new">
+          Enregistrer une nouvelle sortie
+        </a>
+        <div class="row mb-3">
+          {% for trip in user_trips %}
+            <div class="col-3 mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ trip.name }}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">soon</h6>
+                  <p class="card-text">{{ trip.description }}</p>
+                  <a class="btn btn-outline-dark stretched-link" href="/{{ user.username }}/trip/{{ trip.uuid }}">
+                    Voir la sortie
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="row mb-3">
+          <h2 class="mb-3 mt-4">En tant que participant</h2>
+          {% for trip in participant_trips %}
+            <div class="col-3 mb-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ trip.0.name }}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">soon</h6>
+                  <p class="card-text">{{ trip.0.description }}</p>
+                  <a class="btn btn-outline-dark stretched-link" href="/{{ trip.1.username }}/trip/{{ trip.0.uuid }}">
+                    Plus d'infos
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

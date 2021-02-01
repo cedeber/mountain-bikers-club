@@ -1,0 +1,113 @@
+{% macro disconnected() %}
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <!--li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/">Discover</a>
+    </li-->
+    <li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/-/features">
+        Fonctionnalités
+      </a>
+    </li>
+    <!--li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/-/pricing">Pricing</a>
+    </li-->
+  </ul>
+  <ul class="navbar-nav mb-2 mb-lg-0">
+    <li class="nav-item">
+      <a class="nav-link" href="/-/login">Se connecter</a>
+    </li>
+    <li class="nav-item ms-lg-2 mb-2 mb-lg-0">
+      <a class="btn btn-outline-success" href="/-/join" role="button">S'enregister</a>
+    </li>
+    <li class="nav-item dropdown ms-lg-2">
+      <a class="btn btn-outline-secondary" href="https://discord.gg/7VuxunNdHZ" target="_blank"
+         rel="noreferrer">
+        <i class="fab fa-discord"></i>
+        Chat
+      </a>
+    </li>
+  </ul>
+{% endmacro disconnected %}
+
+{% macro connected(user) %}
+  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <!--li class="nav-item">
+      <a class="nav-link" aria-current="page" href="/">
+        Tableau de bord
+      </a>
+    </li-->
+  </ul>
+  <ul class="navbar-nav mb-2 mb-lg-0 align-items-lg-center">
+    <!--li class="nav-item dropdown mb-2 mb-lg-0">
+      <a class="btn btn-outline-secondary border-0" href="https://discord.gg/7VuxunNdHZ" target="_blank"
+         rel="noreferrer" aria-label="Chat">
+        <i class="fab fa-discord"></i>
+      </a>
+    </li-->
+    <li class="nav-item dropdown ms-lg-2 mb-2 mb-lg-0">
+      <button class="btn btn-outline-secondary dropdown-toggle border-0" type="button" id="dropdownMenuButton"
+              data-bs-toggle="dropdown" aria-expanded="false" aria-label="Ajouter">
+        <i class="fad fa-plus"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+        <li><a class="dropdown-item" href="/-/new">
+          Nouvelle sortie
+        </a></li>
+        <li>
+          <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#gpxModal">
+            Importer un GPX
+          </button>
+        </li>
+      </ul>
+    </li>
+    <li class="nav-item dropdown ms-lg-2">
+      <button class="btn btn-outline-secondary dropdown-toggle border-0" type="button" id="dropdownMenuButton"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="{{ user | avatar_url }}" width="24" height="24" class="rounded-circle"
+             alt="{{ user | display_name }}">
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+        <li><span class="dropdown-item-text text-muted">Connecté en tant que <strong>{{ user.username }}</strong></span></li>
+        <li>
+          <hr class="dropdown-divider">
+        </li>
+        <!--li><a class="dropdown-item" href="/{{ user.username }}">Mon profil</a></li-->
+        <li><a class="dropdown-item" href="/{{ user.username }}?tab=activity">Mon activité</a></li>
+        <li><a class="dropdown-item" href="/{{ user.username }}?tab=trips">Mes sorties</a></li>
+        <!--li><a class="dropdown-item" href="/{{ user.username }}?tab=statistics">Mes statistics</a></li-->
+        <li>
+          <hr class="dropdown-divider">
+        </li>
+        <!--li><a class="dropdown-item" href="/{{ user.username }}?tab=settings">Réglages</a></li-->
+        <li><a class="dropdown-item" href="/api/user/logout">Se déconnecter</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- GPX Modal -->
+  <div class="modal fade" id="gpxModal" tabindex="-1" aria-labelledby="gpxModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="/api/trip/gpx" method="post" accept-charset="utf-8" enctype="multipart/form-data"
+              class="text-start">
+          <div class="modal-header">
+            <h5 class="modal-title" id="gpxModalLabel">Importer un GPX</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="file" required class="form-control" id="inputGroupFile" name="file"
+                   aria-label="Importer un GPX"
+                   aria-describedby="fileHelp">
+            <div id="fileHelp" class="form-text">Le fichier ne sera pas sauvegardé. Il ne sera utilisé que pour créer
+              une nouvelle sortie.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-success">Créer une nouvelle sortie</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endmacro connected %}

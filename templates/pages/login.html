@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_join.html" as form %}
+{% block title %}Se connecter{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="col col-sm-8 col-md-6 col-lg-4 col-xxl-3 mx-auto text-center my-5">
+      <img class="mb-4" src="/web/assets/logos/icon-44.svg" alt="" width="88" height="88">
+      <h1 class="h3 mb-3 fw-normal">Merci de vous connecter</h1>
+      <form action="/api/user/login" method="post" accept-charset="utf-8">
+        <div class="mb-3">
+          <label for="username" class="form-label">Nom d'utilisateur⋅trice</label>
+          <div class="input-group">
+          <span class="input-group-text">
+            <i class="fad fa-id-badge width-20"></i>
+          </span>
+            <input type="text" class="form-control form-control-lg" id="username" name="username"
+                   required minlength="4" maxlength="32" autocomplete="current-username" autofocus>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label d-block">Mot de passe</label>
+          <div class="input-group">
+          <span class="input-group-text">
+            <i class="fad fa-key-skeleton width-20"></i>
+          </span>
+            <input type="password" class="form-control form-control-lg" id="password" name="password"
+                   required autocomplete="current-password">
+          </div>
+        </div>
+        <div class="mt-4 d-grid">
+          <input type="checkbox" name="i_am_not_a_robot" value="1" style="display:none" tabindex="-1"
+                 autocomplete="nope">
+          <button type="submit" class="btn btn-lg btn-primary">Se connecter</button>
+        </div>
+      </form>
+      <p class="mt-4">Nouveau membre ?
+        <a href="/-/join">Créez un compte</a>.</p>
+    </div>
+  </main>
+{% endblock content %}

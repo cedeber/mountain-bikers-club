@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_join.html" as form %}
+{% block title %}Rejoignez Mountain Bikers Club{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="col col-sm-9 col-md-7 col-lg-5 col-xxl-4 mx-auto text-center my-5">
+      <img class="mb-4" src="/web/assets/logos/icon-44.svg" alt="" width="88" height="88">
+      <h1 class="h3 mb-3 fw-normal">Rejoignez Mountain Bikers Club</h1>
+      {{ form::form_join() }}
+      <p class="mt-4">
+        Déjà membre ?
+        <a href="/-/login">Se connecter</a>.
+      </p>
+    </div>
+  </main>
+{% endblock content %}

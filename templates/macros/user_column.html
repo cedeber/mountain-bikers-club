@@ -1,0 +1,170 @@
+{% macro column(member, user, is_followed=false) %}
+  <div class="d-flex align-items-center d-md-block">
+    <div class="ratio ratio-1x1 mb-4 bg-light border overflow-hidden me-3 me-md-0 user-avatar"
+         style="border-radius: 50%">
+      {% if user and member.username == user.username %}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#avatarModal">
+      {% endif %}
+      <img src="{{ member | avatar_url }}" alt="logo" width="100%" height="100%"
+           {% if user and member.username == user.username %}data-bs-toggle="tooltip" data-bs-placement="top"
+           title="Modifier mon avatar"{% endif %}>
+      {% if user and member.username == user.username %}
+        </a>
+      {% endif %}
+    </div>
+    <div class="">
+      {% if member.name %}
+        <h1 class="m-0 h3">{{ member.name }}</h1>
+        <p class="lead text-muted">{{ member.username }}</p>
+      {% else %}
+        <h1 class="h4 mb-3">{{ member.username }}</h1>
+      {% endif %}
+    </div>
+  </div>
+  {% if member.bio %}
+    <p>{{ member.bio }}</p>
+  {% endif %}
+  {% if user and member.username != user.username %}
+    {% if is_followed %}
+      <form action="/api/user/unfollow" method="post" accept-charset="utf-8">
+        <input type="hidden" name="username" value="{{ member.username }}">
+        <div class="mb-3 d-grid">
+          <button type="submit" class="btn btn-outline-secondary btn-sm">Se désabonner</button>
+        </div>
+      </form>
+    {% else %}
+      <form action="/api/user/follow" method="post" accept-charset="utf-8">
+        <input type="hidden" name="username" value="{{ member.username }}">
+        <div class="mb-3 d-grid">
+          <button type="submit" class="btn btn-primary btn-sm">S'abonner</button>
+        </div>
+      </form>
+    {% endif %}
+  {% endif %}
+  {% if user and member.username == user.username %}
+    <div class="mb-3 d-grid">
+      <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal">
+        Modifier mon profil
+      </button>
+    </div>
+  {% endif %}
+  <table class="table table-sm table-borderless small">
+    <tbody>
+    <tr>
+      <th class="text-center width-30"><i class="fad fa-user-friends"></i></th>
+      <td>
+        <a href="/{{ member.username }}?tab=following" class="link-dark">
+          <strong>{{ following }}</strong> abonnement{% if following > 1 %}s{% endif %}</a>
+        ·
+        <a href="/{{ member.username }}?tab=followers" class="link-dark">
+          <strong>{{ followers }}</strong> abonné{% if followers > 1 %}s{% endif %}</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <table class="table table-sm table-borderless small">
+    <tbody>
+    {% if member.location %}
+      <tr>
+        <th class="text-center width-30"><i class="fad fa-map-marker-alt"></i></th>
+        <td>{{ member.location }}</td>
+      </tr>
+    {% endif %}
+    <!--tr>
+      <th class="text-center"><i class="fad fa-calendar-alt"></i></th>
+      <td>A rejoint MTBC en novembre 2009</td>
+    </tr-->
+    </tbody>
+  </table>
+  <!--
+  <hr>
+  <h3 class="h5">Points forts</h3>
+  <p>Duis aute irure dolor in.</p>
+  -->
+
+  {% if user and member.username == user.username %}
+    <!-- Modal Edit -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">
+              Modifier mon profil
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="/api/user/update" method="post" accept-charset="utf-8">
+            <div class="modal-body">
+              <!--div class="mb-3">
+                <label for="username" class="form-label">Nom d'utilisateur⋅trice</label>
+                <input type="text" class="form-control" id="username" name="username" required minlength="4"
+                       maxlength="32" pattern="^[a-zA-Z0-9_]{4,32}$" autocomplete="username"
+                       aria-describedby="usernameHelp" value="{{ user.username }}">
+                <div id="usernameHelp" class="form-text">
+                  Un nom d'utilisateur⋅trice unique, entre 4 et 32 lettres ou chiffres. Pas d'espace ni de caractères
+                  spéciaux excepté le souligné.
+                  <dynamic-username from="username" username="{{ user.username }}"></dynamic-username>
+                </div>
+              </div-->
+              <input type="hidden" name="username" value="{{ user.username }}">
+              <div class="mb-3">
+                <label for="name" class="form-label">Nom réel</label>
+                <input type="text" class="form-control" id="name" name="name" maxlength="80" value="{{ user.name }}">
+              </div>
+              <div class="mb-3">
+                <label for="location" class="form-label">Localité</label>
+                <input type="text" class="form-control" id="location" name="location" aria-describedby="locationHelp"
+                       value="{{ user.location }}" maxlength="120">
+                <div id="locationHelp" class="form-text">
+                  Région où vous ridez, pays de résidence...
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="bio" class="form-label">Biographie</label>
+                <textarea class="form-control autosize" id="bio" rows="3" name="bio"
+                          maxlength="280" aria-describedby="bioHelp">{{ user.bio }}</textarea>
+                <div id="bioHelp" class="form-text">
+                  Présentez-vous en quelques mots.
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <input type="reset" class="btn btn-secondary me-auto" value="Réinitialiser">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Sauvegarder</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avatar Upload -->
+    <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="avatarModalLabel">
+              Importer une photo
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="/api/user/avatar" method="post" accept-charset="utf-8" enctype="multipart/form-data">
+            <div class="modal-body">
+              <input type="file" required class="form-control" id="inputGroupFile" name="file"
+                     aria-label="Nouvel avatar" aria-describedby="fileHelp">
+              <div id="fileHelp" class="form-text">
+                La photo sera redimensionnée (500&times;500px) et recadrée au centre si nécessaire.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Modifier mon avatar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endmacro disconnected %}

@@ -1,0 +1,64 @@
+.trip-background,
+.rider-background {
+    position: relative;
+    overflow: hidden;
+}
+
+.trip-background::before,
+.rider-background::before {
+    content: "";
+    display: block;
+    z-index: -1;
+    position: absolute;
+    top: -3rem;
+    left: 0;
+    width: 100%;
+    height: calc(100% + 6rem);
+    background-size: cover;
+    background-position: center;
+}
+
+.rider-background::before {
+    background-image: linear-gradient(
+            rgba(0, 0, 0, 0.35),
+            rgba(0, 0, 0, 0.35)
+    ), url("/web/assets/Laemmerhirt_Nikon_D850_DSC3056_large.jpg");
+}
+
+.trip-background::before {
+    background-image: linear-gradient(
+            rgba(0, 0, 0, 0.5),
+            rgba(0, 0, 0, 0.5)
+    ), url("/web/assets/matheus-ferrero-TkrRvwxjb_8-unsplash_large.jpg");
+}
+
+.width-20 {
+    width: 20px;
+}
+
+.width-30 {
+    width: 30px;
+}
+
+.noise-background {
+    position: relative
+}
+
+.noise-background::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(/web/assets/noise.gif);
+    opacity: 0.05;
+    z-index: -1
+}
+
+@media (max-width: 991.98px) {
+    .user-avatar {
+        width: 120px;
+    }
+}

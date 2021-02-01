@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_join.html" as form %}
+{% block title %}Bienvenue{% endblock title %}
+{% block navigation %}
+  {{ navigation::disconnected() }}
+{% endblock navigation %}
+{% block content %}
+  <div class="rider-background">
+    <div class="container">
+      <div class="row my-5 py-0 py-lg-5">
+        <div class="col-12 col-lg-8 d-flex flex-column justify-content-center text-white mb-5 mb-lg-0">
+          <img class="mb-4" src="/web/assets/logos/icon-44.svg" alt="" width="128" height="128">
+          <h1 class="mb-3 display-2" style="font-weight: 900">
+            Réunissez tous les Mountain Bikers !
+          </h1>
+          <p class="h2">
+            Ne roulez plus jamais seul.
+            Planifiez votre prochaine aventure et invitez tous vos amis à vous rejoindre.
+          </p>
+        </div>
+        <div class="col-12 col-lg-4">
+          <div class="shadow bg-light p-3 rounded">
+            <h3 class="h3">Rejoignez Mountain Bikers Club</h3>
+            {{ form::form_join() }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

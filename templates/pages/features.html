@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% block title %}Fonctionnalités{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container pb-5">
+    <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+      <h1 class="display-4">Fonctionnalités</h1>
+      <p><span class="badge bg-warning text-dark">beta en cours</span></p>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">
+            Détails de la sortie
+            <sup><span class="badge bg-primary fw-normal" style="font-size: 40%">nouveau</span></sup>
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">gratuit</span></sup>
+          </h5>
+          <p class="h4 fw-normal">Quelques détails à propos de la sortie comme un nom, une description, mais
+            aussi la distance, le temps estimé, le dénivelé, etc...</p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Point de rendez-vous
+            <sup><span class="badge bg-primary fw-normal" style="font-size: 40%">nouveau</span></sup>
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">gratuit</span></sup></h5>
+          <p class="h4 fw-normal">Donnez l'adresse de rendez-vous et laissez vos potes voir ça sur une
+            carte.</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">
+            Invitez vos amis
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">gratuit</span></sup>
+          </h5>
+          <p class="h4 fw-normal">
+            Une page unique pour rassembler tous les riders ensemble. Copiez le lien et partagez-le. Facile.
+          </p>
+          <!--img class="mt-auto rounded w-100 h-auto" src="/web/assets/matheus-ferrero-TkrRvwxjb_8-unsplash_large.jpg" alt=""-->
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">
+            Qui vous rejoint ?
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">gratuit</span></sup>
+          </h5>
+          <p class="h4 fw-normal">
+            La liste de tous vos potes pour savoir avec qui vous aller rider.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">
+            Discussion
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">gratuit</span></sup>
+          </h5>
+          <p class="h4 fw-normal">
+            Chattez avec les autres participants. Restez informé. Ne loupez plus aucune information importante.
+          </p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+      </div>
+    </div>
+    <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+      <h1 class="display-4">Développement en cours</h1>
+      <p><span class="badge bg-primary">bientôt</span></p>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Notifications
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">free</span></sup></h5>
+          <p class="h4 fw-normal">Receive notifications for chat and updates.</p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Approved friends list
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">free</span></sup></h5>
+          <p class="h4 fw-normal">
+            Keep a list of friends and stay informed if they go out.
+            People who can follow you need to be approved by you.</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Public or private user page</h5>
+          <p class="h4 fw-normal">Show to the world what you've ride and the next adventures (if public).</p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Public or private trips</h5>
+          <p class="h4 fw-normal">Keep your trip private.</p>
+        </div>
+      </div>
+    </div>
+    <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+      <h1 class="display-4">Future Plan</h1>
+      <p><span class="badge bg-danger">2021</span></p>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">GPX
+            <sup><span class="badge bg-success fw-normal" style="font-size: 40%">free</span></sup></h5>
+          <p class="h4 fw-normal">Upload a GPX file to let people know exactly what the trip is going to
+            be and/or how it was.</p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Photos</h5>
+          <p class="h4 fw-normal">Upload photos for remembering how fun it was.</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg mb-4">
+        <div class="h-100 d-flex flex-column text-center bg-light py-3 px-5 rounded position-relative border">
+          <h5 class="display-6 fw-bold">Statistics</h5>
+          <p class="h4 fw-normal">Precise analysis of your trip.</p>
+        </div>
+      </div>
+      <div class="col-12 col-lg mb-4"></div>
+    </div>
+  </main>
+{% endblock content %}

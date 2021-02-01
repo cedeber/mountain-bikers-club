@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/user_column.html" as user_column %}
+{% import "macros/user_menu.html" as user_menu %}
+{% block title %}Aperçu{% endblock title %}
+{% block navigation %}
+  {% if connected_user %}
+    {{ navigation::connected(user=connected_user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <main class="container">
+    <div class="row my-5">
+      <div class="col-3">
+        {{ user_column::column(user=user, connected_user=connected_user) }}
+      </div>
+      <div class="col-9">
+        <nav>
+          {{ user_menu::menu(username=user.username, active_tab="overview") }}
+        </nav>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

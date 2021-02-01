@@ -1,0 +1,77 @@
+{% import "macros/form_trip_datetime.html" as form_datetime %}
+{% macro form_trip(trip=false, datetime=false) %}
+  <div class="mb-3">
+    <label for="name" class="form-label">Nom de la sortie</label>
+    <input type="text" class="form-control" id="name" name="name"
+           aria-describedby="nameHelp" required="required" value="{{ trip.name | default(value="") }}">
+    <div id="nameHelp" class="form-text">
+      Donnez un nom inoubliable, juste pour le fun.
+    </div>
+  </div>
+  <div class="mb-3">
+    <label for="description" class="form-label">Description et informations</label>
+    <textarea class="form-control autosize" id="description" rows="3" name="description"
+              aria-describedby="descriptionHelp">{{ trip.description | default(value="") }}</textarea>
+    <div id="descriptionHelp" class="form-text">
+      Destination, lieux de passage, difficulté, bière à la fin...
+    </div>
+  </div>
+  <div class="mb-3">
+    {% if datetime %}
+      {{ form_datetime::datetime(datetime=datetime) }}
+    {% else %}
+      {{ form_datetime::datetime() }}
+    {% endif %}
+    <current-timezone datetime="{% if trip %}{{ trip.date }}{% endif %}"></current-timezone>
+  </div>
+  <div class="mb-3">
+    <label for="meeting_point" class="form-label">
+      Adresse du point de rendez-vous
+    </label>
+    <div class="input-group">
+      <div class="input-group-text"><i class="fad fa-map-marked-alt width-20"></i></div>
+      <input type="text" class="form-control" id="meeting_point" name="meeting_point"
+             aria-describedby="meetingPointHelp" value="{{ trip.meeting_point | default(value="") }}">
+    </div>
+    <div id="meetingPointHelp" class="form-text">
+      D'où part la sortie? On y verra une carte sur la page de la sortie.
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <div class="col-12 col-sm mb-3 mb-sm-0">
+      <label for="time_hour" class="form-label">
+        Temps
+      </label>
+      <div class="input-group">
+        <div class="input-group-text"><i class="fad fa-stopwatch width-20"></i></div>
+        <input type="text" class="form-control" id="time_hour" name="time_hour"
+               value="{% if time %}{{ time.0 }}{% endif %}">
+        <div class="input-group-text">:</div>
+        <input type="text" class="form-control" id="time_minute" name="time_minute"
+               value="{% if time %}{{ time.1 }}{% endif %}">
+      </div>
+    </div>
+    <div class="col-12 col-sm mb-3 mb-sm-0">
+      <label for="distance" class="form-label">
+        Distance
+      </label>
+      <div class="input-group">
+        <div class="input-group-text"><i class="fad fa-route width-20"></i></div>
+        <input type="text" class="form-control" id="distance" name="distance"
+               value="{% if trip and trip.distance and trip.distance != "0.00" %}{{ trip.distance }}{% endif %}">
+        <div class="input-group-text">kms</div>
+      </div>
+    </div>
+    <div class="col-12 col-sm">
+      <label for="elevation" class="form-label">
+        Dénivelé
+      </label>
+      <div class="input-group">
+        <div class="input-group-text"><i class="fad fa-mountain width-20"></i></div>
+        <input type="text" class="form-control" id="elevation" name="elevation"
+               value="{% if trip and trip.elevation != 0 %}{{ trip.elevation }}{% endif %}">
+        <div class="input-group-text">m</div>
+      </div>
+    </div>
+  </div>
+{% endmacro form_trip %}

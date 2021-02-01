@@ -1,0 +1,295 @@
+{% extends "layout.html" %}
+{% import "macros/navigation.html" as navigation %}
+{% import "macros/form_join.html" as form %}
+{% import "macros/form_trip.html" as form_trip %}
+{% block title %}{{ member | display_name }} / Sortie : {{ trip.name }}{% endblock title %}
+{% block navigation %}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
+  {% else %}
+    {{ navigation::disconnected() }}
+  {% endif %}
+{% endblock navigation %}
+{% block content %}
+  <div class="trip-background">
+    <div class="container">
+      <div class="row my-lg-5 py-5">
+        <div class="col-12 col-lg-5 order-3 order-lg-1">
+          <div class="bg-light shadow p-3 rounded mt-3">
+            <h3 class="h3 mb-3">Information</h3>
+            <p class="text-break">
+              {{ trip.description }}
+            </p>
+            <table class="table table-sm table-borderless">
+              <tbody>
+              <tr>
+                <th class="text-center">
+                  <img src="{{ member | avatar_url }}" width="24" height="24" class="rounded-circle" alt="">
+                </th>
+                <td>
+                  <a href="/{{ member.username }}">{{ member | display_name }}</a>
+                </td>
+              </tr>
+              <tr>
+                <th class="text-center"><i class="fad fa-calendar-day"></i></th>
+                <td>
+                  <date-time date="{{ trip.date }}"></date-time>
+                </td>
+              </tr>
+              {% if trip.meeting_point %}
+                <tr>
+                  <th class="text-center"><i class="fad fa-map-marker-alt"></i></th>
+                  <td>Départ depuis {{ trip.meeting_point }}</td>
+                </tr>
+              {% endif %}
+              </tbody>
+            </table>
+            {% if trip.meeting_point %}
+              <div class="rounded overflow-hidden position-relative border">
+                <address-map address="{{ trip.meeting_point }}" zoom="14"></address-map>
+              </div>
+            {% endif %}
+            <ul class="list-group list-group-horizontal mt-3">
+              {% if trip.time %}
+                <li class="list-group-item bg-transparent">
+                  <i class="fad fa-stopwatch me-1 width-20"></i>
+                  {{ trip.time.0 }}:{{ trip.time.1 }}
+                </li>
+              {% endif %}
+              {% if trip.distance %}
+                <li class="list-group-item bg-transparent">
+                  <i class="fad fa-route me-1 width-20"></i>
+                  {{ trip.distance }} kms
+                </li>
+              {% endif %}
+              {% if trip.elevation and trip.elevation > 0 %}
+                <li class="list-group-item bg-transparent">
+                  <i class="fad fa-mountain me-1 width-20"></i>
+                  {{ trip.elevation }} m
+                </li>
+              {% endif %}
+            </ul>
+            {% if user %}
+              {% if user.id == member.id %}
+                <!-- Button trigger modal -->
+                <div class="mt-3 d-grid gap-2 d-sm-flex justify-content-between w-100">
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">
+                    Modifier la sortie
+                  </button>
+                  <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                          data-bs-target="#deleteModal">
+                    Supprimer la sortie
+                  </button>
+                </div>
+              {% else %}
+                {% if not is_listed and not trip.finished %}
+                  <div class="mt-3 d-grid gap-2 d-sm-flex justify-content-between w-100">
+                    <form action="/api/trip/join" method="post" accept-charset="utf-8" class="d-inline">
+                      <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                      <input type="hidden" name="redirect_trip_username" value="{{ member.username }}">
+                      <input type="hidden" name="redirect_trip_uuid" value="{{ trip.uuid }}">
+                      <input type="hidden" name="will_join" value="true">
+                      <button type="submit" class="btn btn-success">Je viens. Allons rider.</button>
+                    </form>
+                    <form action="/api/trip/join" method="post" accept-charset="utf-8" class="d-inline">
+                      <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                      <input type="hidden" name="redirect_trip_username" value="{{ member.username }}">
+                      <input type="hidden" name="redirect_trip_uuid" value="{{ trip.uuid }}">
+                      <input type="hidden" name="will_join" value="false">
+                      <button type="submit" class="btn btn-danger">Pas cette fois, désolé.</button>
+                    </form>
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              <div class="mt-4 d-flex w-100 justify-content-between">
+                <a class="btn btn-success" href="/-/join" role="button">
+                  Créez un compte pour rejoindre la sortie
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-lg-1 order-2"></div>
+        <div
+            class="col-12 col-lg-6 order-1 order-lg-3 d-flex flex-column text-center justify-content-center text-white mb-5 mb-lg-0">
+          <h1 class="mb-3 display-4 fw-bold">
+            {{ trip.name }}
+          </h1>
+          <div class="input-group mt-4">
+            <input class="form-control border-primary bg-dark text-light" type="text" id="clipboard"
+                   value="https://www.mountainbikers.club/{{ member.username }}/trip/{{ trip.uuid }}"
+                   aria-label="Link to share with your friends" readonly>
+            <button class="btn btn-primary btn-clipboard" type="button" id="button-link" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Partagez cette adresse avec vos amis"
+                    data-clipboard-target="#clipboard">
+              Copier
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <main class="container pt-5 mb-5">
+    <div class="row">
+      <div class="col-12 col-lg-7 order-3 order-lg-1">
+        <h3 class="mb-3">Commentaires</h3>
+        <div class="container">
+          {% for comment in comments %}
+            {% set us = comment.1 %}
+            <div class="row {% if user and us.id == user.id %}justify-content-end{% endif %}">
+              <div
+                  class="col-8 mb-3 p-2 pt-1 rounded-3 {% if user and us.id == user.id %}bg-primary text-white{% else %}border bg-light{% endif %}">
+                <a href="/{{ us.username }}"
+                   class="{% if user and us.id == user.id %}link-light{% else %}link-dark{% endif %} text-decoration-none small">
+                  <img src="{{ us | avatar_url }}" width="16" height="16" alt="" class="rounded-circle align-middle me-1">
+                  <strong>{{ us | display_name }}</strong></a>
+                <small
+                    class="ms-2 {% if user and us.id == user.id %}text-white-50{% else %}text-black-50{% endif %}"
+                    style="font-size: 80%">
+                  <date-time date="{{ comment.0.date | date_rfc }}" short="true"></date-time>
+                </small>
+                <p class="m-0 mt-1">
+                  {{ comment.0.message }}
+                </p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if user %}
+          <div class="mt-3">
+            <form action="/api/comment/new" method="post" accept-charset="utf-8">
+              <input type="hidden" name="trip_id" value="{{ trip.id }}">
+              <input type="hidden" name="redirect_trip_username" value="{{ member.username }}">
+              <input type="hidden" name="redirect_trip_uuid" value="{{ trip.uuid }}">
+              <label for="message" class="form-label d-block">Message<small
+                  class="text-muted float-end">500 caractères max.</small></label>
+              <div class="input-group">
+                <textarea class="form-control autosize" id="message" rows="1" name="message" maxlength="500"></textarea>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fad fa-comment-alt-lines"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+      <div class="col-lg-1 order-2"></div>
+      <div class="col-12 col-lg-4 order-& order-lg-3 mb-3 mb-lg-0">
+        <h3 class="mb-3">Participants</h3>
+        <ul class="list-group">
+          <li class="list-group-item bg-light">
+            <a href="/{{ member.username }}" class="stretched-link link-dark text-decoration-none">
+              <i class="fad fa-user-crown me-1 text-primary width-20"></i>
+              {{ member | display_name }}
+              {% if user and user.id == member.id %}<sup><span class="badge bg-info">c'est moi</span></sup>{% endif %}
+            </a>
+          </li>
+          {% for p in participants %}
+            <li class="list-group-item">
+              <a href="/{{ p.1.username }}" class="stretched-link link-dark text-decoration-none">
+                <i class="fad width-20 fa-user-{% if p.0.will_join %}check{% else %}times{% endif %} me-1 text-{% if p.0.will_join %}success{% else %}danger{% endif %}"></i>
+                {% set yo = p.1 %}
+                {{ yo | display_name }}
+                {% if user and user.id == yo.id %}<sup><span class="badge bg-info">c'est moi</span></sup>{% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if user %}
+          {% if user.id != member.id and not trip.finished %}
+            <div class="border bg-light p-3 rounded mt-4">
+              <h3 class="h5">Vous nous rejoignez ?</h3>
+              {% if is_listed %}
+                <form action="/api/trip/reconsider" method="post" accept-charset="utf-8">
+              {% else %}
+                <form action="/api/trip/join" method="post" accept-charset="utf-8">
+              {% endif %}
+              <input type="hidden" name="trip_id" value="{{ trip.id }}">
+              <input type="hidden" name="redirect_trip_username" value="{{ member.username }}">
+              <input type="hidden" name="redirect_trip_uuid" value="{{ trip.uuid }}">
+              <div class="my-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="will_join"
+                         id="willJoinYes" value="true" {% if is_listed.1 %}checked{% endif %}
+                         {% if not is_listed %}checked{% endif %}>
+                  <label class="form-check-label" for="willJoinYes">
+                    Je viens. Allons rider.
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="will_join"
+                         id="willJoinNo" value="false" {% if is_listed and not is_listed.1 %}checked{% endif %}>
+                  <label class="form-check-label" for="willJoinNo">
+                    Pas cette fois, désolé.
+                  </label>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                {% if is_listed %}Mettre à jour{% else %}Enregistrer{% endif %}
+              </button>
+              </form>
+            </div>
+          {% endif %}
+        {% else %}
+          <a class="btn btn-success mt-3" href="/-/join" role="button">
+            Créez un compte pour rejoindre la sortie
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+
+  {% if user and user.id == member.id %}
+    <!-- Modal Edit -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">
+              Modifier {{ trip.name }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="/api/trip/update" method="post" accept-charset="utf-8">
+            <div class="modal-body">
+              {{ form_trip::form_trip(trip=trip, datetime=datetime) }}
+            </div>
+            <div class="modal-footer">
+              <input type="hidden" name="trip_id" value="{{ trip.id }}">
+              <input type="reset" class="btn btn-secondary me-auto" value="Réinitialiser">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Sauvegarder</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Modal Delete -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Êtes-vous sûr⋅e de vouloir supprimer la sortie ?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-1">La sortie "{{ trip.name }}" va être supprimée.</p>
+            <p class="text-danger mb-0">Vous ne serez pas en mesure de la retrouver.</p>
+          </div>
+          <div class="modal-footer">
+            <form action="/api/trip/delete" method="post" accept-charset="utf-8">
+              <input type="hidden" name="trip_id" value="{{ trip.id }}">
+              <input type="hidden" name="redirect_trip_username" value="{{ member.username }}">
+              <input type="hidden" name="redirect_trip_uuid" value="{{ trip.uuid }}">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-danger">Je suis sûr⋅e</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock content %}

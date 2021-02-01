@@ -1,0 +1,53 @@
+{% macro form_join() %}
+  <form action="/api/user/new" method="post" accept-charset="utf-8" class="text-start">
+    <div class="mb-3">
+      <label for="username" class="form-label">Nom d'utilisateur⋅trice</label>
+      <div class="input-group">
+      <span class="input-group-text">
+        <i class="fad fa-id-badge width-20"></i>
+      </span>
+        <input type="text" class="form-control" id="username" name="username" required minlength="4" maxlength="32"
+               pattern="^[a-zA-Z0-9_]{4,32}$" autocomplete="username" aria-describedby="usernameHelp">
+      </div>
+      <div id="usernameHelp" class="form-text">
+        Un nom d'utilisateur⋅trice unique, entre 4 et 32 lettres ou chiffres. Pas d'espace ni de caractères spéciaux
+        excepté le souligné.
+        <dynamic-username from="username"></dynamic-username>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label d-block">Adresse email</label>
+      <div class="input-group">
+      <span class="input-group-text">
+        <i class="fad fa-paper-plane width-20"></i>
+      </span>
+        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required
+               autocomplete="email">
+      </div>
+      <div id="emailHelp" class="form-text">Pas d'entourloupe, promis!</div>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label d-block">Mot de passe</label>
+      <div class="input-group password-eye-group">
+      <span class="input-group-text">
+        <i class="fad fa-key-skeleton width-20"></i>
+      </span>
+        <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp"
+               required
+               autocomplete="current-password">
+        <button class="btn btn-outline-secondary" type="button">
+          <i class="fad fa-eye eye width-20"></i>
+        </button>
+      </div>
+      <div id="passwordHelp" class="form-text">
+        Vérifiez qu'il soit composé d'au moins 8 caractères, un chiffre et une lettre majuscule.
+      </div>
+    </div>
+    <div class="mt-4 d-grid">
+      <input type="checkbox" name="i_am_not_a_robot" value="1" style="display:none" tabindex="-1" autocomplete="nope">
+      <button type="submit" class="btn btn-lg btn-success">
+        S'enregistrer chez MTBC
+      </button>
+    </div>
+  </form>
+{% endmacro form_join %}

@@ -1,0 +1,45 @@
+{% macro menu(username, active_tab) %}
+  <ul class="nav nav-tabs">
+    <!--li class="nav-item">
+      <a class="nav-link {% if active_tab == "overview" %}active{% endif %}"
+         aria-current="page"
+         href="/{{ username }}">
+        <i class="fad fa-book-open width-20 me-1"></i>
+        Aperçu
+      </a>
+    </li-->
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == "activity" %}active{% endif %}"
+         aria-current="page"
+         href="/{{ username }}?tab=activity">
+        <i class="fad fa-biking-mountain width-20 me-1"></i>
+        Activité
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == "trips" %}active{% endif %}"
+         href="/{{ username }}?tab=trips">
+        <i class="fad fa-map-marked-alt width-20 me-1"></i> Sorties
+        <span class="badge bg-secondary ms-1">{{ trips_count }}</span>
+      </a>
+    </li>
+    <!--li class="nav-item">
+      <a class="nav-link {% if active_tab == "statistics" %}active{% endif %}"
+         href="/{{ username }}?tab=statistics">
+        <i class="fad fa-chart-bar width-20 me-1"></i>
+        Statistiques</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == "settings" %}active{% endif %}"
+         href="/{{ username }}?tab=settings">
+        <i class="fad fa-user-cog width-20 me-1"></i>
+        Réglages
+      </a>
+    </li-->
+    <!--li class="nav-item">
+      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+        Inactive
+      </a>
+    </li-->
+  </ul>
+{% endmacro disconnected %}

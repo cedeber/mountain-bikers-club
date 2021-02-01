@@ -1,0 +1,13 @@
+-- Your SQL goes here
+
+ALTER TABLE trips
+    ADD COLUMN meeting_point VARCHAR(120) NOT NULL DEFAULT '';
+
+ALTER TABLE trips
+    ADD COLUMN time INT NOT NULL DEFAULT 0;
+
+ALTER TABLE trips
+    ADD COLUMN distance INT NOT NULL DEFAULT 0;
+
+ALTER TABLE trips
+    ADD COLUMN elevation INT NOT NULL DEFAULT 0;
