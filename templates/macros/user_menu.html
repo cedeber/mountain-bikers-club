@@ -1,13 +1,13 @@
 {% macro menu(username, active_tab) %}
   <ul class="nav nav-tabs">
-    <!--li class="nav-item">
+    <li class="nav-item">
       <a class="nav-link {% if active_tab == "overview" %}active{% endif %}"
          aria-current="page"
          href="/{{ username }}">
         <i class="fad fa-book-open width-20 me-1"></i>
         Aperçu
       </a>
-    </li-->
+    </li>
     <li class="nav-item">
       <a class="nav-link {% if active_tab == "activity" %}active{% endif %}"
          aria-current="page"

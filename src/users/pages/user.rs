@@ -64,10 +64,41 @@ fn render_user_overview(
     user: &Option<User>,
     member: &User,
 ) -> Result<HttpResponse> {
+    let is_followed = if user.is_some() {
+        let user = user.as_ref().unwrap();
+        let follow_query: QueryResult<Follow> = followers::table
+            .filter(followers::user_id.eq(user.id))
+            .filter(followers::following_id.eq(member.id))
+            .first::<Follow>(conn);
+        follow_query.is_ok()
+    } else {
+        false
+    };
+
+    let following_query: QueryResult<Vec<Follow>> = followers::table
+        .filter(followers::user_id.eq(member.id))
+        .load::<Follow>(conn);
+    let following = match following_query {
+        Ok(q) => q.len(),
+        Err(_) => 0,
+    };
+
+    let followers_query: QueryResult<Vec<Follow>> = followers::table
+        .filter(followers::following_id.eq(member.id))
+        .load::<Follow>(conn);
+    let followers = match followers_query {
+        Ok(q) => q.len(),
+        Err(_) => 0,
+    };
+
     let mut ctx = tera::Context::new();
-    ctx.insert("connected_user", user); // TODO user
-    ctx.insert("user", member); // TODO member
+    ctx.insert("user", user);
+    ctx.insert("member", member);
+    ctx.insert("is_followed", &is_followed);
+    ctx.insert("following", &following);
+    ctx.insert("followers", &followers);
     ctx.insert("message", &consume_message(&session));
+    ctx.insert("trips_count", &get_member_trips_count(conn, &member.id));
 
     let body = tmpl
         .render("user/overview.html", &ctx)

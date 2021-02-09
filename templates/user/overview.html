@@ -2,10 +2,10 @@
 {% import "macros/navigation.html" as navigation %}
 {% import "macros/user_column.html" as user_column %}
 {% import "macros/user_menu.html" as user_menu %}
-{% block title %}Aperçu{% endblock title %}
+{% block title %}{{ member | display_name }}{% endblock title %}
 {% block navigation %}
-  {% if connected_user %}
-    {{ navigation::connected(user=connected_user) }}
+  {% if user %}
+    {{ navigation::connected(user=user) }}
   {% else %}
     {{ navigation::disconnected() }}
   {% endif %}
@@ -14,7 +14,7 @@
   <main class="container">
     <div class="row my-5">
       <div class="col-3">
-        {{ user_column::column(user=user, connected_user=connected_user) }}
+        {{ user_column::column(member=member, user=user) }}
       </div>
       <div class="col-9">
         <nav>
