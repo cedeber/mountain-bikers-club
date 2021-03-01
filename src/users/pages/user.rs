@@ -3,7 +3,7 @@ use crate::p404;
 use crate::schema::{followers, trips, users};
 use crate::trips::{get_trip_context, TripContext};
 use crate::users::utils::get_user;
-use crate::utils::{consume_message, redirect_to};
+use crate::utils::consume_message;
 use actix_identity::Identity;
 use actix_session::Session;
 use actix_web::error::ErrorInternalServerError;
