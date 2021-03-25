@@ -342,6 +342,17 @@ async fn cdn(req: HttpRequest) -> HttpResponse {
         .await;
 
     if let Ok(file) = file {
+        // let stream = file.body.unwrap();
+        // let body = stream
+        //     .map_ok(|b| BytesMut::from(&b[..]))
+        //     .try_concat()
+        //     .await
+        //     .unwrap();
+        //
+        // HttpResponse::Ok()
+        //     .header("Cache-Control", "max-age=7200") // 5 days
+        //     .body(body)
+
         HttpResponse::Ok()
             .header("Cache-Control", "max-age=7200") // 5 days
             .streaming(file.body.unwrap())
