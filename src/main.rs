@@ -215,6 +215,7 @@ async fn main() -> io::Result<()> {
             .wrap(middleware::Logger::default())
             // router
             .service(web::resource("/").to(index))
+            .service(web::resource("/robots.txt").to(|| redirect_to("/web/robots.txt")))
             .service(
                 web::scope("/-")
                     .service(utils::mailto) // => /mail/{to}

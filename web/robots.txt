@@ -1,3 +1,3 @@
 User-agent: *
-Disallow: /*/trip/
-Disallow /-/validate/*
+Disallow /-/mail/*
+Disallow /api/*
