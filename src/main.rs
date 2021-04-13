@@ -215,7 +215,7 @@ async fn main() -> io::Result<()> {
             .wrap(middleware::Logger::default())
             // router
             .service(web::resource("/").to(index))
-            .service(web::resource("/robots.txt").to(|| redirect_to("/web/robots.txt")))
+            .service(web::resource("/robots.txt").to(robots))
             .service(
                 web::scope("/-")
                     .service(utils::mailto) // => /mail/{to}
@@ -361,4 +361,13 @@ async fn cdn(req: HttpRequest) -> HttpResponse {
         redirect_to("/web/assets/logos/icon-44.svg")
         // HttpResponse::NotFound().finish()
     }
+}
+
+// Robots.txt
+async fn robots() -> HttpResponse {
+    let data = std::fs::read_to_string("web/robots.txt").expect("Unable to read robots.txt");
+
+    HttpResponse::Ok()
+        .header("Cache-Control", "max-age=7200") // 5 days
+        .body(data)
 }
