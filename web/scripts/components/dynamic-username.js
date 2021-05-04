@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'https://cdn.skypack.dev/lit-element?min'
+import { LitElement, html, css } from 'https://cdn.skypack.dev/lit?min'
 
 export class DynamicUsername extends LitElement {
   static get styles () {

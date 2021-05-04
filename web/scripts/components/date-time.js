@@ -1,4 +1,4 @@
-import { LitElement, html } from 'https://cdn.skypack.dev/lit-element?min'
+import { LitElement, html } from 'https://cdn.skypack.dev/lit?min'
 
 export class DateTime extends LitElement {
   short
@@ -37,6 +37,9 @@ export class DateTime extends LitElement {
 
   render () {
     let date = new Date(Date.parse(this.date))
+
+    console.log(date.toLocaleDateString(navigator.language, this.options))
+
     return html`
       <span lang="${navigator.language}">
         ${date.toLocaleDateString(navigator.language, this.options)}

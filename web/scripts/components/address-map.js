@@ -1,4 +1,4 @@
-import { LitElement, html } from 'https://cdn.skypack.dev/lit-element?min'
+import { LitElement, html } from 'https://cdn.skypack.dev/lit?min'
 import L from 'https://cdn.skypack.dev/leaflet?min'
 
 export class AddressMap extends LitElement {
