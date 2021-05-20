@@ -6,6 +6,10 @@ What things you need to install the software and how to install them.
 
 - To simulate S3, use [minio](https://min.io).
 
+### Postgres
+
+- Run `CREATE EXTENSION fuzzystrmatch` to use `METAPHONE()`
+
 ## Deployment
 
 ### Environment variables
@@ -35,6 +39,11 @@ AWS_S3_ENDPOINT=
 Please make sure to read the [Contributing Guide](CONTRIBUTING.md) before making a pull request.
 
 Thank you to all [the people who already contributed to Mountain Bikers Club](https://github.com/cedeber/mountain-bikers-club/graphs/contributors)!
+
+### Vocabulary
+
+- *user*: a current logged-in user or someone that tries to do something
+- *member*: the current member page, member trip...
 
 ## License
 [AGPL-3.0](LICENSE)
