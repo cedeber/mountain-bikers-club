@@ -41,18 +41,20 @@ mod users;
 mod utils;
 
 lazy_static! {
-    // Postgres DB
+    /// Postgres DB
     pub static ref POOL: models::Pool = {
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let manager = ConnectionManager::<PgConnection>::new(database_url);
         r2d2::Pool::builder()
             // .max_size(45)
             .build(manager)
-            .expect("Failed to create pool.")
+            .expect("Failed to create DB pool.")
     };
-    // Avatar Actor
+
+    /// Avatar Actor: Resize uploaded picture and save it to S3
     pub static ref AVATAR_ACTOR: Addr<AvatarActor> = SyncArbiter::start(1, || AvatarActor);
-    // Rusoto S3 Client
+
+    /// Rusoto: S3 Client
     pub static ref S3_CLIENT: S3Client = {
         let region = Region::Custom {
             name: "".to_owned(),
@@ -67,20 +69,23 @@ pub struct SessionMessage {
     message: String,
 }
 
+/// User dashboard or Default homepage
 async fn index(
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    tmpl: web::Data<tera::Tera>,
-    session: Session,
+    tmpl: web::Data<tera::Tera>, // Tera
+    pool: web::Data<Pool>,       // DB
+    user_id: Identity,           // Web token
+    session: Session,            // Server session + Cookie
 ) -> Result<HttpResponse> {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
     let body = match user {
         Some(user) => {
+            // User dashboard
             return Ok(redirect_to(&*format!("/{}?tab=activity", user.username)));
         }
         None => {
+            // Go to homepage if not connected
             let mut ctx = tera::Context::new();
             ctx.insert("message", &consume_message(&session));
 
@@ -102,7 +107,7 @@ async fn index(
         .body(body))
 }
 
-/// Define message
+/// Message System for the Avatar Actor
 struct AvatarMessage {
     data: Vec<u8>,
     username: String,
@@ -131,9 +136,11 @@ impl Handler<AvatarMessage> for AvatarActor {
         //     .unwrap();
         let mut rt = Runtime::new().unwrap();
 
+        // Connection to the DB
         let connection = &POOL.get().unwrap();
-        let data = msg.data;
-        if let Ok(img) = ImageReader::new(Cursor::new(data))
+
+        // Get image data from the messaging system
+        if let Ok(img) = ImageReader::new(Cursor::new(msg.data))
             .with_guessed_format()
             .unwrap()
             .decode()
@@ -142,8 +149,12 @@ impl Handler<AvatarMessage> for AvatarActor {
 
             if let Some(user) = user {
                 let mut image_data: Vec<u8> = vec![];
+
+                // We don't need big picture for the avatar
                 let img = img.resize_to_fill(500, 500, FilterType::Lanczos3);
                 let _ = img.write_to(&mut image_data, ImageOutputFormat::Jpeg(75));
+
+                // Save image into S3
                 let put_cmd = S3_CLIENT.put_object(PutObjectRequest {
                     body: Some(image_data.into()),
                     bucket: env::var("AWS_S3_BUCKET_NAME").expect("AWS_S3_BUCKET_NAME must be set"),
@@ -251,8 +262,9 @@ async fn main() -> io::Result<()> {
                     .use_etag(true)
                     .use_last_modified(true),
             )
-            // user pages
+            // CDN => S3
             .service(web::resource("/cdn/{tail:.*}").route(web::get().to(cdn)))
+            // user pages
             .service(web::resource("/{username}/trip/{uid}").route(web::get().to(trips::trip_page)))
             .service(web::resource("/{username}").route(web::get().to(user_page)))
             // default
@@ -273,35 +285,39 @@ async fn main() -> io::Result<()> {
     .await
 }
 
-/// Static pages, under /-/*
+/// Static pages => /-/{page}
 async fn pages(
-    tmpl: web::Data<tera::Tera>,
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    web::Path(page): web::Path<String>,
-    session: Session,
+    tmpl: web::Data<tera::Tera>,        // Tera
+    pool: web::Data<Pool>,              // DB
+    user_id: Identity,                  // Web token
+    session: Session,                   // Server session + Cookie
+    web::Path(page): web::Path<String>, // Path {page}
 ) -> HttpResponse {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
+    // Tera context
     let mut ctx = Context::new();
     ctx.insert("user", &user);
     ctx.insert("message", &consume_message(&session));
 
+    // Render Tera page
     let body = tmpl.render(&*format!("pages/{}.html", page), &ctx);
 
     match body {
         Ok(body) => HttpResponse::Ok().content_type("text/html").body(body),
         Err(e) => match e.kind {
+            // Page probably doesn't exist (404)
             ErrorKind::TemplateNotFound(_) => p404(tmpl)
                 .await
+                // Just return a simple 404 code with an empty page in case the 404 render fails
                 .unwrap_or_else(|_| HttpResponse::NotFound().finish()),
             _ => HttpResponse::InternalServerError().body(format!("{:#?}", e)),
         },
     }
 }
 
-/// 404 handler
+/// Page 404 handler
 async fn p404(tmpl: web::Data<tera::Tera>) -> Result<HttpResponse> {
     let body = tmpl
         .render("errors/404.html", &Context::new())
@@ -312,18 +328,20 @@ async fn p404(tmpl: web::Data<tera::Tera>) -> Result<HttpResponse> {
         .body(body))
 }
 
-// Tera filters
+/// Tera filter: Get real name or username instead
 pub fn display_name(value: &Value, _: &HashMap<String, Value>) -> tera::Result<Value> {
     let s = try_get_value!("display_name", "value", User, value);
     let r = get_user_display_name(&s);
     Ok(to_value(&r).unwrap())
 }
 
+/// Tera filter: Get CDN based url for the user avatar
 pub fn avatar_url(value: &Value, _: &HashMap<String, Value>) -> tera::Result<Value> {
     let s = try_get_value!("avatar_url", "value", User, value);
     Ok(to_value(format!("/cdn/avatars/{}.jpg", s.id)).unwrap())
 }
 
+/// Tera filter: Get date in RFC-3339 format, so that JavaScript can deal with it
 pub fn date_rfc(value: &Value, _: &HashMap<String, Value>) -> tera::Result<Value> {
     let s = try_get_value!("date", "value", SystemTime, value);
     let date: DateTime<Utc> = s.into();
@@ -331,7 +349,7 @@ pub fn date_rfc(value: &Value, _: &HashMap<String, Value>) -> tera::Result<Value
     Ok(to_value(date).unwrap())
 }
 
-// CDN S3
+/// CDN S3 handler => /cdn/{tail:.*}
 async fn cdn(req: HttpRequest) -> HttpResponse {
     let path: String = req.match_info().get("tail").unwrap().parse().unwrap();
     let file = S3_CLIENT
@@ -363,11 +381,15 @@ async fn cdn(req: HttpRequest) -> HttpResponse {
     }
 }
 
-// Robots.txt
+/// Robots.txt handler => /robots.txt
 async fn robots() -> HttpResponse {
-    let data = std::fs::read_to_string("web/robots.txt").expect("Unable to read robots.txt");
+    let data = std::fs::read_to_string("web/robots.txt");
 
-    HttpResponse::Ok()
-        .header("Cache-Control", "max-age=7200") // 5 days
-        .body(data)
+    if let Ok(data) = data {
+        HttpResponse::Ok()
+            .header("Cache-Control", "max-age=7200") // 5 days
+            .body(data)
+    } else {
+        HttpResponse::NotFound().finish()
+    }
 }

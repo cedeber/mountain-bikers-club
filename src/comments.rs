@@ -21,22 +21,27 @@ pub fn get_comments_for(connection: &PgConnection, trip_id: &i32) -> Vec<(Commen
 // --- POST ---
 #[derive(Debug, Deserialize)]
 pub struct NewCommentForm {
-    trip_id: i32,
-    redirect_trip_username: String,
-    redirect_trip_uuid: String,
-    message: String,
+    // The user_id is retrieved via the Session Web Token
+    trip_id: i32,    // Hidden field
+    message: String, // Mandatory comment
+
+    // Used to redirect to the trip page
+    redirect_trip_username: String, // Hidden field
+    redirect_trip_uuid: String,     // Hidden field
 }
 
-// => /api/comment/new
+/// New trip comment handler => /api/comment/new
+/// Need user authentification
 pub async fn post_new(
-    form: web::Form<NewCommentForm>,
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    session: Session,
+    pool: web::Data<Pool>,           // DB
+    user_id: Identity,               // Web token
+    session: Session,                // Server session + Cookie
+    form: web::Form<NewCommentForm>, // HTML Form
 ) -> Result<HttpResponse> {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
+    // TODO, make that generic (+ above?)
     if user.is_none() {
         return Ok(HttpResponse::Unauthorized().finish());
     }
@@ -44,6 +49,9 @@ pub async fn post_new(
     let user = user.unwrap();
 
     if form.message.is_empty() {
+        // Session message in case it is empty or it fails.
+        // This HTML input field is mandatory.
+
         // message "message-sorry-unexpected-error"
         let message = String::from("Désolé, une erreur inattendue s'est produite.");
         session.set("message", SessionMessage { message })?;
@@ -58,6 +66,7 @@ pub async fn post_new(
             message: String::from(&form.message),
         };
 
+        // Save comment to DB.
         let insert = diesel::insert_into(comments::table)
             .values(new_comment)
             .execute(connection);
@@ -68,6 +77,7 @@ pub async fn post_new(
                 form.redirect_trip_username, form.redirect_trip_uuid
             ))),
             Err(_) => {
+                // Send a message in case the save fails.
                 // message "message-sorry-unexpected-error"
                 let message = String::from("Désolé, une erreur inattendue s'est produite.");
                 session.set("message", SessionMessage { message })?;

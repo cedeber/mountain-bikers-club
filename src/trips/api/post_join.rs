@@ -9,16 +9,17 @@ use actix_session::Session;
 use actix_web::{web, HttpResponse, Result};
 use diesel::prelude::*;
 
-// => /api/trip/join
+/// Allow a user to join a trip form another member => /api/trip/join
 pub async fn join(
+    pool: web::Data<Pool>, // DB
+    user_id: Identity,     // Web token
+    session: Session,      // Server session + Cookie
     form: web::Form<JoinForm>,
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    session: Session,
 ) -> Result<HttpResponse> {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
+    // Need to be identified
     if user.is_none() {
         return Ok(HttpResponse::Unauthorized().finish());
     }

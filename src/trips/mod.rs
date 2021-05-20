@@ -16,6 +16,7 @@ use std::time::SystemTime;
 mod api;
 mod pages;
 
+// Used to register a new Trip for instance
 #[derive(Serialize)]
 pub struct TripDateTime {
     day: String,
@@ -62,12 +63,17 @@ pub enum ParticipateStatus {
     Unknown,
 }
 
+/// Create Tera context for the Trip
+/// @param member Is the current user from the viewed trip page, not the connected user
 pub fn get_trip_context(conn: &PgConnection, member: &Option<User>, trip: &Trip) -> TripContext {
     let trip = trip.clone();
 
+    // Format time. Will be used with JavaScript to be translatable and apply any timezone
     let date: DateTime<Utc> = trip.date.into();
     let date_string = date.to_rfc3339();
 
+    // Format any time to show it on the page
+    // Always 2 digits, hours and minutes separated
     let time_hour = trip.time / 3600;
     let time_minute = (trip.time % 3600) / 60;
     let time = if time_hour + time_minute > 0 {
@@ -76,6 +82,8 @@ pub fn get_trip_context(conn: &PgConnection, member: &Option<User>, trip: &Trip)
         None
     };
 
+    // Format distance to show it on the page
+    // Maximum 2 digits after the comma.
     let distance = if trip.distance == 0 {
         None
     } else {
@@ -83,12 +91,14 @@ pub fn get_trip_context(conn: &PgConnection, member: &Option<User>, trip: &Trip)
         Some(format!("{:.2}", distance / 1000.))
     };
 
+    // Done or planned in the future
     let finished = date.timestamp() < Utc::now().timestamp();
 
     let participate_status = if let Some(member) = member {
         if member.id == trip.author {
             ParticipateStatus::Organizer
         } else {
+            // try to find out if the user is registered to the current trip
             let result: QueryResult<Vec<bool>> = trips_users::table
                 .select(trips_users::will_join)
                 .filter(trips_users::trip_id.eq(trip.id))

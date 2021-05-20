@@ -12,16 +12,17 @@ use diesel::prelude::*;
 use std::ops::Add;
 use std::time::SystemTime;
 
-// => /api/trip/update
+/// Allow a user to modify its own trip metadata => /api/trip/update
 pub async fn update(
+    pool: web::Data<Pool>, // DB
+    user_id: Identity,     // Web token
+    session: Session,      // Server session + Cookie
     form: web::Form<UpdateForm>,
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    session: Session,
 ) -> Result<HttpResponse> {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
+    // Need to be identified
     if user.is_none() {
         return Ok(HttpResponse::Unauthorized().finish());
     }
@@ -36,6 +37,7 @@ pub async fn update(
                 message: "Merci de remplir tous les champs obligatoires.".to_string(),
             },
         )?;
+        // TODO Redirect to current trip?
         return Ok(redirect_to("/"));
     }
 

@@ -17,16 +17,17 @@ use serde_json::json;
 use std::io::{BufReader, Cursor, Read};
 use std::time::SystemTime;
 
-// => /api/trip/new
+/// Import and parse a GPX file. Create a new trip once uploaded and parsed => /api/trip/new
 pub async fn gpx(
+    pool: web::Data<Pool>, // DB
+    user_id: Identity,     // Web token
+    session: Session,      // Server session + Cookie
     mut payload: Multipart,
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    session: Session,
 ) -> Result<HttpResponse> {
     let connection: &PgConnection = &pool.get().unwrap();
     let user = get_user(connection, &user_id.identity());
 
+    // Need to be identified
     if user.is_none() {
         return Ok(HttpResponse::Unauthorized().finish());
     }
@@ -35,10 +36,6 @@ pub async fn gpx(
 
     // while let Ok(Some(mut field)) = payload.try_next().await {
     if let Ok(Some(mut field)) = payload.try_next().await {
-        // println!("{:#?}", field);
-        // println!("{:#?}", field.content_disposition().unwrap().get_filename());
-        // println!("{:#?}", field.content_disposition().unwrap().to_string());
-
         let mut full = Vec::new();
 
         while let Some(chunk) = field.next().await {
@@ -46,14 +43,9 @@ pub async fn gpx(
             full.extend_from_slice(&data);
         }
 
-        // let content = String::from_utf8(full.clone())
-        //     .map_err(|e| ErrorInternalServerError(format!("{:#?}", e)))?;
-
         let f = BufReader::new(Cursor::new(full));
-        // let new_trip =
-        //     parse(f, &user.id).map_err(|e| ErrorInternalServerError(format!("{:#?}", e)))?;
 
-        let new_trip = parse(f, &user.id).await;
+        let new_trip = parse_gpx_data(f, &user.id).await;
         if new_trip.is_err() {
             session.set(
                 "message",
@@ -64,6 +56,7 @@ pub async fn gpx(
             return Ok(redirect_to("/"));
         }
 
+        // Save the trip metadata into the DB
         let new_trip = new_trip.unwrap();
         let trip = diesel::insert_into(trips::table)
             .values(new_trip)
@@ -96,7 +89,7 @@ pub async fn gpx(
     Ok(redirect_to("/"))
 }
 
-async fn parse(reader: impl Read, user_id: &i32) -> Result<NewTrip, gpx::errors::Error> {
+async fn parse_gpx_data(reader: impl Read, user_id: &i32) -> Result<NewTrip, gpx::errors::Error> {
     let gpx = read(reader)?;
     let mut name: Option<String> = None;
     let mut description: Option<String> = None;

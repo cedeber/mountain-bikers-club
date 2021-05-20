@@ -116,13 +116,14 @@ pub fn _verify_token(encoded_token: &str) -> Option<String> {
 }
 
 // --- User ---
+/// Check in DB if user exists and has an active account
 pub fn get_user(connection: &PgConnection, username: &Option<String>) -> Option<User> {
     use crate::schema::users;
 
     match username {
         Some(username) => {
             let user: QueryResult<User> = users::table
-                .filter(users::username.eq(&username))
+                .filter(users::username.eq(&username.to_lowercase()))
                 .filter(users::active.eq(true))
                 .first::<User>(connection);
 
@@ -135,6 +136,7 @@ pub fn get_user(connection: &PgConnection, username: &Option<String>) -> Option<
     }
 }
 
+/// Get real name or username instead
 pub fn get_user_display_name(user: &User) -> String {
     if !user.name.is_empty() {
         user.name.clone()

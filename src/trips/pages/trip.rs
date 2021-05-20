@@ -1,6 +1,7 @@
 use crate::comments::get_comments_for;
 use crate::models::{Pool, Trip, TripUser, User};
 use crate::p404;
+use crate::schema::{trips, trips_users, users};
 use crate::trips::{get_trip_context, get_trip_datetime};
 use crate::users::utils::get_user;
 use crate::utils::consume_message;
@@ -11,22 +12,17 @@ use actix_web::{web, HttpResponse, Result};
 use diesel::prelude::*;
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, QueryResult};
 
+/// Trip page handler => /{username}/trip/{uid}
 pub async fn trip(
-    pool: web::Data<Pool>,
-    user_id: Identity,
-    tmpl: web::Data<tera::Tera>,
+    tmpl: web::Data<tera::Tera>, // Tera
+    pool: web::Data<Pool>,       // DB
+    user_id: Identity,           // Web token
+    session: Session,            // Server session + Cookie
     web::Path((username, uid)): web::Path<(String, String)>,
-    session: Session,
 ) -> Result<HttpResponse> {
-    use crate::schema::trips;
-    use crate::schema::trips_users;
-    use crate::schema::users;
-
     let connection: &PgConnection = &pool.get().unwrap();
-    let user_id = user_id.identity();
-    let username = username.to_lowercase();
 
-    let user = get_user(connection, &user_id);
+    let user = get_user(connection, &user_id.identity());
     let member = get_user(connection, &Some(username.clone()));
 
     if member.is_none() {
@@ -61,6 +57,7 @@ pub async fn trip(
                 None => None,
             };
 
+            // TODO Merge: Trip Context + Default Context?
             let mut ctx = tera::Context::new();
             ctx.insert("user", &user);
             ctx.insert("member", &member);

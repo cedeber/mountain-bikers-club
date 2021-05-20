@@ -7,6 +7,7 @@ pub mod post_new;
 pub mod post_reconsider;
 pub mod post_update;
 
+/// Allow to work with optional fields from a HTML form. See bellow.
 pub fn deserialize_option_ignore_error<'de, T, D>(d: D) -> Result<Option<T>, D::Error>
 where
     T: serde::Deserialize<'de>,
